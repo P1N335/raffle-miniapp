@@ -2,10 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { getTelegramWebApp } from "@/app/lib/telegram";
-import { API_BASE_URL } from "@/app/lib/api";
+
+type AppUser = {
+  id: string;
+  telegramId: string;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  photoUrl: string | null;
+};
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export function useTelegramAuth() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,10 +38,14 @@ export function useTelegramAuth() {
           }),
         });
 
+        if (!response.ok) {
+          throw new Error(`Auth failed: ${response.status}`);
+        }
+
         const data = await response.json();
         setUser(data);
       } catch (error) {
-        console.error("Telegram auth failed", error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
