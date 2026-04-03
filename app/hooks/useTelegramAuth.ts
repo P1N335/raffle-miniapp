@@ -60,7 +60,28 @@ export function useTelegramAuth() {
         });
 
         if (!response.ok) {
-          throw new Error(`Auth failed: ${response.status}`);
+          let errorMessage = `Auth failed: ${response.status}`;
+
+          try {
+            const errorPayload = (await response.json()) as {
+              message?: string | string[];
+              error?: string;
+            };
+
+            const backendMessage = Array.isArray(errorPayload.message)
+              ? errorPayload.message.join(", ")
+              : errorPayload.message;
+
+            if (backendMessage) {
+              errorMessage = `${errorMessage} - ${backendMessage}`;
+            } else if (errorPayload.error) {
+              errorMessage = `${errorMessage} - ${errorPayload.error}`;
+            }
+          } catch {
+            // Ignore JSON parse errors and keep the HTTP status message.
+          }
+
+          throw new Error(errorMessage);
         }
 
         const data = (await response.json()) as AppUser;
