@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, Copy } from "lucide-react";
 
 export default function ProfilePage() {
-  const { user, loading } = useTelegramAuth();
+  const { user, loading, error } = useTelegramAuth();
 
   const displayName = user?.username
     ? `@${user.username}`
@@ -32,6 +32,12 @@ export default function ProfilePage() {
           <div>Loading...</div>
         ) : (
           <>
+            {error && (
+              <div className="mb-4 rounded-2xl bg-amber-100 px-4 py-3 text-sm text-amber-900">
+                Auth warning: {error}
+              </div>
+            )}
+
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-sky-600 text-white">
                 {user?.photoUrl ? (
@@ -59,7 +65,7 @@ export default function ProfilePage() {
             <div className="mt-6 flex items-center justify-between rounded-2xl bg-slate-100 px-4 py-4">
               <div>
                 <div className="text-sm text-slate-500">Telegram ID</div>
-                <div className="mt-1 text-xl font-bold">{user?.telegramId ?? "—"}</div>
+                <div className="mt-1 text-xl font-bold">{user?.telegramId ?? "-"}</div>
               </div>
 
               <button

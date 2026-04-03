@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTelegramWebApp } from "@/app/lib/telegram";
+import { buildApiUrl } from "@/app/lib/api";
+import { getTelegramUser, getTelegramWebApp } from "@/app/lib/telegram";
 
 type AppUser = {
-  id: string;
+  id: string | null;
   telegramId: string;
   username: string | null;
   firstName: string | null;
@@ -12,23 +13,43 @@ type AppUser = {
   photoUrl: string | null;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+function mapTelegramUserToAppUser(user: ReturnType<typeof getTelegramUser>): AppUser | null {
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: null,
+    telegramId: String(user.id),
+    username: user.username ?? null,
+    firstName: user.first_name ?? null,
+    lastName: user.last_name ?? null,
+    photoUrl: user.photo_url ?? null,
+  };
+}
 
 export function useTelegramAuth() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const auth = async () => {
       const webApp = getTelegramWebApp();
+      const telegramUser = getTelegramUser();
+
+      if (telegramUser) {
+        setUser(mapTelegramUserToAppUser(telegramUser));
+      }
 
       if (!webApp?.initData) {
+        setError("Telegram initData is missing");
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/auth/telegram`, {
+        const response = await fetch(buildApiUrl("/auth/telegram"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -42,10 +63,14 @@ export function useTelegramAuth() {
           throw new Error(`Auth failed: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as AppUser;
         setUser(data);
+        setError(null);
       } catch (error) {
         console.error(error);
+        setError(
+          error instanceof Error ? error.message : "Telegram authorization failed"
+        );
       } finally {
         setLoading(false);
       }
@@ -54,5 +79,5 @@ export function useTelegramAuth() {
     auth();
   }, []);
 
-  return { user, loading };
+  return { user, loading, error };
 }
