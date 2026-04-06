@@ -1,42 +1,52 @@
-import { ChevronLeft, Ticket, Trophy } from "lucide-react";
+import { ChevronLeft, Lightbulb, Package2, Ticket, Trophy } from "lucide-react";
 import Link from "next/link";
+import { getCasesOverview } from "@/app/lib/cases";
 
-function RaffleCard({
+type Stat = {
+  label: string;
+  value: string;
+  valueClassName?: string;
+};
+
+function GameCard({
   title,
   subtitle,
-  prizePool,
-  entries,
   buttonText,
   icon,
+  iconClassName,
   buttonClassName,
   href,
+  stats,
 }: {
   title: string;
   subtitle: string;
-  prizePool: string;
-  entries: string;
   buttonText: string;
   icon: React.ReactNode;
+  iconClassName: string;
   buttonClassName: string;
   href: string;
+  stats: Stat[];
 }) {
   return (
     <div className="rounded-3xl bg-white p-6 text-black shadow-sm">
       <div className="flex items-start gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-400 text-white">
+        <div
+          className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white ${iconClassName}`}
+        >
           {icon}
         </div>
 
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-extrabold">{title}</h2>
           <p className="mt-1 text-lg text-slate-600">{subtitle}</p>
-          <div className="mt-4 flex gap-6 text-lg">
-            <span>
-              Prize Pool: <b className="text-sky-600">{prizePool}</b>
-            </span>
-            <span>
-              Entries: <b>{entries}</b>
-            </span>
+
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-lg">
+            {stats.map((stat) => (
+              <span key={stat.label}>
+                {stat.label}:{" "}
+                <b className={stat.valueClassName ?? "text-black"}>{stat.value}</b>
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -52,6 +62,8 @@ function RaffleCard({
 }
 
 export default function GamesPage() {
+  const casesOverview = getCasesOverview();
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-md px-5 py-6 text-white">
       <div className="mb-8 flex items-center gap-4 border-b border-white/20 pb-5">
@@ -69,31 +81,58 @@ export default function GamesPage() {
       </p>
 
       <div className="space-y-5">
-        <RaffleCard
+        <GameCard
           title="Lucky Raffle"
           subtitle="Daily raffle with amazing prizes"
-          prizePool="1000 TON"
-          entries="2,547"
           buttonText="Enter Raffle"
           icon={<Ticket className="h-7 w-7" />}
+          iconClassName="bg-orange-400"
           buttonClassName="bg-sky-500"
           href="/games/raffle"
+          stats={[
+            { label: "Prize Pool", value: "1000 TON", valueClassName: "text-sky-600" },
+            { label: "Entries", value: "2,547" },
+          ]}
         />
 
-        <RaffleCard
+        <GameCard
           title="Coin Flip"
-          subtitle="Two players, one winner"
-          prizePool="5000 TON"
-          entries="847"
-          buttonText="Enter Coin Flip"
+          subtitle="50/50 chance to win premium prizes"
+          buttonText="Play Coin Flip"
           icon={<Trophy className="h-7 w-7" />}
+          iconClassName="bg-gradient-to-br from-violet-500 to-pink-500"
           buttonClassName="bg-gradient-to-r from-violet-500 to-pink-500"
           href="/games/coinflip"
+          stats={[
+            { label: "Prize Pool", value: "5000 TON", valueClassName: "text-sky-600" },
+            { label: "Entries", value: "847" },
+          ]}
+        />
+
+        <GameCard
+          title="Cases"
+          subtitle="Open cases to win exclusive items"
+          buttonText="Browse Cases"
+          icon={<Package2 className="h-7 w-7" />}
+          iconClassName="bg-gradient-to-br from-cyan-500 to-teal-400"
+          buttonClassName="bg-gradient-to-r from-teal-500 to-cyan-500"
+          href="/games/cases"
+          stats={[
+            {
+              label: "Available",
+              value: `${casesOverview.count} Cases`,
+              valueClassName: "text-sky-600",
+            },
+            { label: "From", value: `${casesOverview.minPriceTon} TON` },
+          ]}
         />
       </div>
 
       <div className="mt-6 rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-base text-white/90">
-        💡 Enter games to win Telegram presents and TON rewards
+        <div className="flex items-center gap-3">
+          <Lightbulb className="h-5 w-5 text-amber-300" />
+          Enter raffles to win Telegram presents and TON rewards
+        </div>
       </div>
     </main>
   );
