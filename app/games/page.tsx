@@ -1,6 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ChevronLeft, Lightbulb, Package2, Ticket, Trophy } from "lucide-react";
 import Link from "next/link";
-import { getCasesOverview } from "@/app/lib/cases";
+import { fetchCasesCatalog } from "@/app/lib/cases-api";
 
 type Stat = {
   label: string;
@@ -62,7 +65,38 @@ function GameCard({
 }
 
 export default function GamesPage() {
-  const casesOverview = getCasesOverview();
+  const [casesOverview, setCasesOverview] = useState({
+    count: 0,
+    minPriceTon: 0,
+  });
+
+  useEffect(() => {
+    const loadCasesOverview = async () => {
+      try {
+        const cases = await fetchCasesCatalog();
+
+        if (cases.length === 0) {
+          setCasesOverview({
+            count: 0,
+            minPriceTon: 0,
+          });
+          return;
+        }
+
+        setCasesOverview({
+          count: cases.length,
+          minPriceTon: Math.min(...cases.map((caseItem) => caseItem.priceTon)),
+        });
+      } catch {
+        setCasesOverview({
+          count: 0,
+          minPriceTon: 0,
+        });
+      }
+    };
+
+    loadCasesOverview();
+  }, []);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-md px-5 py-6 text-white">
@@ -120,10 +154,15 @@ export default function GamesPage() {
           stats={[
             {
               label: "Available",
-              value: `${casesOverview.count} Cases`,
+              value: casesOverview.count ? `${casesOverview.count} Cases` : "Loading...",
               valueClassName: "text-sky-600",
             },
-            { label: "From", value: `${casesOverview.minPriceTon} TON` },
+            {
+              label: "From",
+              value: casesOverview.minPriceTon
+                ? `${casesOverview.minPriceTon} TON`
+                : "Loading...",
+            },
           ]}
         />
       </div>

@@ -1,15 +1,19 @@
 export type CaseReward = {
   id: string;
+  dropId: string;
+  telegramGiftTypeId?: string | null;
   name: string;
   image: string;
   rarity: "common" | "rare" | "epic" | "legendary";
   chance: number;
+  valueLabel: string;
+  estimatedValueTon: number;
   accent: string;
   textColor: string;
-  valueLabel: string;
 };
 
 export type CaseDefinition = {
+  id: string;
   slug: string;
   name: string;
   tagline: string;
@@ -22,454 +26,50 @@ export type CaseDefinition = {
   rewards: CaseReward[];
 };
 
-export const caseCatalog: CaseDefinition[] = [
-  {
-    slug: "starter-case",
-    name: "Starter Case",
-    tagline: "Open for 10 TON",
-    shortDescription: "Friendly drops with bright collectibles and gift staples.",
-    priceTon: 10,
-    badgeGradient: "linear-gradient(135deg, #2d7df6 0%, #18c7ea 100%)",
-    buttonGradient: "linear-gradient(90deg, #1b8cf3 0%, #1ec7dc 100%)",
-    surfaceTint: "#ddf4ff",
-    image: "/images/08.png",
-    rewards: [
-      {
-        id: "starter-rose",
-        name: "Rose Bloom",
-        image: "/images/07.png",
-        rarity: "common",
-        chance: 28,
-        accent: "linear-gradient(135deg, #ffe2e2 0%, #ffb4b4 100%)",
-        textColor: "#4a1111",
-        valueLabel: "Soft drop",
-      },
-      {
-        id: "starter-sweet",
-        name: "Sweet Spin",
-        image: "/images/12.png",
-        rarity: "common",
-        chance: 24,
-        accent: "linear-gradient(135deg, #fff6bf 0%, #ffd970 100%)",
-        textColor: "#4f3500",
-        valueLabel: "Candy gift",
-      },
-      {
-        id: "starter-bloom",
-        name: "Cherry Bloom",
-        image: "/images/13.png",
-        rarity: "rare",
-        chance: 18,
-        accent: "linear-gradient(135deg, #ffe6fa 0%, #ffb5e8 100%)",
-        textColor: "#5a1f4d",
-        valueLabel: "Seasonal drop",
-      },
-      {
-        id: "starter-heart",
-        name: "Ribbon Heart",
-        image: "/images/10.png",
-        rarity: "rare",
-        chance: 14,
-        accent: "linear-gradient(135deg, #ffe0ef 0%, #ff7ab8 100%)",
-        textColor: "#591437",
-        valueLabel: "Love token",
-      },
-      {
-        id: "starter-gift",
-        name: "Golden Box",
-        image: "/images/08.png",
-        rarity: "epic",
-        chance: 10,
-        accent: "linear-gradient(135deg, #fff0be 0%, #ffb347 100%)",
-        textColor: "#5c3000",
-        valueLabel: "Wrapped prize",
-      },
-      {
-        id: "starter-ring",
-        name: "Silver Ring",
-        image: "/images/02.png",
-        rarity: "legendary",
-        chance: 6,
-        accent: "linear-gradient(135deg, #f0f8ff 0%, #96d2ff 100%)",
-        textColor: "#11395d",
-        valueLabel: "Rare jewel",
-      },
-    ],
-  },
-  {
-    slug: "mystery-case",
-    name: "Mystery Case",
-    tagline: "Open for 25 TON",
-    shortDescription: "Unexpected pulls with playful odds and hidden premium gems.",
-    priceTon: 25,
-    badgeGradient: "linear-gradient(135deg, #00c853 0%, #06d6a0 100%)",
-    buttonGradient: "linear-gradient(90deg, #00b85b 0%, #13d0a5 100%)",
-    surfaceTint: "#dcffe7",
-    image: "/images/12.png",
-    rewards: [
-      {
-        id: "mystery-bear",
-        name: "Cozy Bear",
-        image: "/images/09.png",
-        rarity: "common",
-        chance: 22,
-        accent: "linear-gradient(135deg, #f1dfbd 0%, #cfa065 100%)",
-        textColor: "#4f3318",
-        valueLabel: "Cute collectible",
-      },
-      {
-        id: "mystery-cake",
-        name: "Party Cake",
-        image: "/images/11.png",
-        rarity: "common",
-        chance: 20,
-        accent: "linear-gradient(135deg, #ffe2f0 0%, #ffb2cf 100%)",
-        textColor: "#5d2241",
-        valueLabel: "Celebration drop",
-      },
-      {
-        id: "mystery-gift",
-        name: "Gift Crate",
-        image: "/images/08.png",
-        rarity: "rare",
-        chance: 18,
-        accent: "linear-gradient(135deg, #fff0bb 0%, #ffca55 100%)",
-        textColor: "#5f3900",
-        valueLabel: "Surprise box",
-      },
-      {
-        id: "mystery-heart",
-        name: "Velvet Heart",
-        image: "/images/10.png",
-        rarity: "rare",
-        chance: 16,
-        accent: "linear-gradient(135deg, #ffd6e8 0%, #ff7fbf 100%)",
-        textColor: "#61163e",
-        valueLabel: "Warm charm",
-      },
-      {
-        id: "mystery-gem",
-        name: "Blue Gem",
-        image: "/images/01.png",
-        rarity: "epic",
-        chance: 14,
-        accent: "linear-gradient(135deg, #d9f3ff 0%, #7ad1ff 100%)",
-        textColor: "#103d5c",
-        valueLabel: "Spark drop",
-      },
-      {
-        id: "mystery-trophy",
-        name: "Golden Cup",
-        image: "/images/03.png",
-        rarity: "legendary",
-        chance: 10,
-        accent: "linear-gradient(135deg, #fff2b2 0%, #ffb300 100%)",
-        textColor: "#4b3000",
-        valueLabel: "Prestige win",
-      },
-    ],
-  },
-  {
-    slug: "premium-case",
-    name: "Premium Case",
-    tagline: "Open for 50 TON",
-    shortDescription: "Shiny gems, rich cosmetics and better premium hit rates.",
-    priceTon: 50,
-    badgeGradient: "linear-gradient(135deg, #a137ff 0%, #ff4db7 100%)",
-    buttonGradient: "linear-gradient(90deg, #9d42ff 0%, #ff2fa2 100%)",
-    surfaceTint: "#f8e3ff",
-    image: "/images/01.png",
-    rewards: [
-      {
-        id: "premium-gem",
-        name: "Sky Diamond",
-        image: "/images/01.png",
-        rarity: "rare",
-        chance: 28,
-        accent: "linear-gradient(135deg, #e5f7ff 0%, #8bcfff 100%)",
-        textColor: "#0f3957",
-        valueLabel: "Premium shard",
-      },
-      {
-        id: "premium-ring",
-        name: "Diamond Ring",
-        image: "/images/02.png",
-        rarity: "rare",
-        chance: 24,
-        accent: "linear-gradient(135deg, #ecf6ff 0%, #b5d9ff 100%)",
-        textColor: "#153c5d",
-        valueLabel: "Jewelry drop",
-      },
-      {
-        id: "premium-heart",
-        name: "Royal Heart",
-        image: "/images/10.png",
-        rarity: "epic",
-        chance: 18,
-        accent: "linear-gradient(135deg, #ffe0f1 0%, #ff89c0 100%)",
-        textColor: "#5b1b40",
-        valueLabel: "Rare charm",
-      },
-      {
-        id: "premium-cup",
-        name: "Champion Cup",
-        image: "/images/03.png",
-        rarity: "epic",
-        chance: 14,
-        accent: "linear-gradient(135deg, #fff0ba 0%, #ffcf4d 100%)",
-        textColor: "#543200",
-        valueLabel: "Glory item",
-      },
-      {
-        id: "premium-bloom",
-        name: "Sakura Glow",
-        image: "/images/13.png",
-        rarity: "legendary",
-        chance: 10,
-        accent: "linear-gradient(135deg, #ffe8fb 0%, #ffa1e1 100%)",
-        textColor: "#5d2850",
-        valueLabel: "Festival ultra",
-      },
-      {
-        id: "premium-bear",
-        name: "Velvet Bear",
-        image: "/images/09.png",
-        rarity: "legendary",
-        chance: 6,
-        accent: "linear-gradient(135deg, #f5e7c2 0%, #dba160 100%)",
-        textColor: "#4f3114",
-        valueLabel: "Collector ultra",
-      },
-    ],
-  },
-  {
-    slug: "blossom-case",
-    name: "Blossom Case",
-    tagline: "Open for 75 TON",
-    shortDescription: "Seasonal florals, ribbons and soft luxury rewards.",
-    priceTon: 75,
-    badgeGradient: "linear-gradient(135deg, #ff7ab6 0%, #ffb5d6 100%)",
-    buttonGradient: "linear-gradient(90deg, #ff6ca9 0%, #ff9ccc 100%)",
-    surfaceTint: "#ffe3ef",
-    image: "/images/13.png",
-    rewards: [
-      {
-        id: "blossom-petal",
-        name: "Petal Bloom",
-        image: "/images/13.png",
-        rarity: "common",
-        chance: 26,
-        accent: "linear-gradient(135deg, #ffe9f8 0%, #ffc2e7 100%)",
-        textColor: "#63244a",
-        valueLabel: "Bloom token",
-      },
-      {
-        id: "blossom-rose",
-        name: "Rose Deluxe",
-        image: "/images/07.png",
-        rarity: "rare",
-        chance: 24,
-        accent: "linear-gradient(135deg, #ffe2e2 0%, #ff9b9b 100%)",
-        textColor: "#571a1a",
-        valueLabel: "Romance drop",
-      },
-      {
-        id: "blossom-heart",
-        name: "Cupid Heart",
-        image: "/images/10.png",
-        rarity: "rare",
-        chance: 18,
-        accent: "linear-gradient(135deg, #ffe2f1 0%, #ff87bf 100%)",
-        textColor: "#5d1e43",
-        valueLabel: "Ribbon charm",
-      },
-      {
-        id: "blossom-cake",
-        name: "Pink Cake",
-        image: "/images/11.png",
-        rarity: "epic",
-        chance: 14,
-        accent: "linear-gradient(135deg, #ffe6f5 0%, #ffb0d1 100%)",
-        textColor: "#622845",
-        valueLabel: "Party item",
-      },
-      {
-        id: "blossom-gem",
-        name: "Love Gem",
-        image: "/images/01.png",
-        rarity: "epic",
-        chance: 10,
-        accent: "linear-gradient(135deg, #ddf5ff 0%, #84d4ff 100%)",
-        textColor: "#103b5a",
-        valueLabel: "Blue sparkle",
-      },
-      {
-        id: "blossom-ring",
-        name: "Promise Ring",
-        image: "/images/02.png",
-        rarity: "legendary",
-        chance: 8,
-        accent: "linear-gradient(135deg, #f0f8ff 0%, #aed7ff 100%)",
-        textColor: "#163d5f",
-        valueLabel: "Heart ultra",
-      },
-    ],
-  },
-  {
-    slug: "legendary-case",
-    name: "Legendary Case",
-    tagline: "Open for 100 TON",
-    shortDescription: "Top-shelf trophies, rare gems and prestige collector items.",
-    priceTon: 100,
-    badgeGradient: "linear-gradient(135deg, #ffb100 0%, #ff6f00 100%)",
-    buttonGradient: "linear-gradient(90deg, #ffb300 0%, #ff7a00 100%)",
-    surfaceTint: "#fff1d5",
-    image: "/images/03.png",
-    rewards: [
-      {
-        id: "legendary-cup",
-        name: "Legend Cup",
-        image: "/images/03.png",
-        rarity: "rare",
-        chance: 26,
-        accent: "linear-gradient(135deg, #fff0bf 0%, #ffc533 100%)",
-        textColor: "#5b3500",
-        valueLabel: "Prestige prize",
-      },
-      {
-        id: "legendary-ring",
-        name: "Crystal Ring",
-        image: "/images/02.png",
-        rarity: "rare",
-        chance: 22,
-        accent: "linear-gradient(135deg, #ebf7ff 0%, #9bd1ff 100%)",
-        textColor: "#153d60",
-        valueLabel: "Crown jewel",
-      },
-      {
-        id: "legendary-gem",
-        name: "Grand Diamond",
-        image: "/images/01.png",
-        rarity: "epic",
-        chance: 18,
-        accent: "linear-gradient(135deg, #e2f5ff 0%, #74caff 100%)",
-        textColor: "#123d5e",
-        valueLabel: "Vault reward",
-      },
-      {
-        id: "legendary-gift",
-        name: "Royal Present",
-        image: "/images/08.png",
-        rarity: "epic",
-        chance: 14,
-        accent: "linear-gradient(135deg, #fff3bf 0%, #ffbf3e 100%)",
-        textColor: "#583200",
-        valueLabel: "Wrapped vault",
-      },
-      {
-        id: "legendary-heart",
-        name: "Golden Heart",
-        image: "/images/10.png",
-        rarity: "legendary",
-        chance: 12,
-        accent: "linear-gradient(135deg, #ffe2ee 0%, #ff76b4 100%)",
-        textColor: "#601c3d",
-        valueLabel: "Ultra charm",
-      },
-      {
-        id: "legendary-bear",
-        name: "Hero Bear",
-        image: "/images/09.png",
-        rarity: "legendary",
-        chance: 8,
-        accent: "linear-gradient(135deg, #f5e4bf 0%, #d49753 100%)",
-        textColor: "#4d3015",
-        valueLabel: "Collector ultra",
-      },
-    ],
-  },
-  {
-    slug: "royal-case",
-    name: "Royal Case",
-    tagline: "Open for 200 TON",
-    shortDescription: "The highest tier chest with luxe drops and elite odds.",
-    priceTon: 200,
-    badgeGradient: "linear-gradient(135deg, #ff2a5a 0%, #ff7f11 100%)",
-    buttonGradient: "linear-gradient(90deg, #ff2e63 0%, #ff7f11 100%)",
-    surfaceTint: "#ffe3da",
-    image: "/images/02.png",
-    rewards: [
-      {
-        id: "royal-ring",
-        name: "Royal Ring",
-        image: "/images/02.png",
-        rarity: "rare",
-        chance: 24,
-        accent: "linear-gradient(135deg, #eff8ff 0%, #b4dcff 100%)",
-        textColor: "#153f63",
-        valueLabel: "Elite jewel",
-      },
-      {
-        id: "royal-gem",
-        name: "Imperial Diamond",
-        image: "/images/01.png",
-        rarity: "epic",
-        chance: 22,
-        accent: "linear-gradient(135deg, #dff6ff 0%, #6fcbff 100%)",
-        textColor: "#103a59",
-        valueLabel: "Vault gem",
-      },
-      {
-        id: "royal-cup",
-        name: "Victory Trophy",
-        image: "/images/03.png",
-        rarity: "epic",
-        chance: 18,
-        accent: "linear-gradient(135deg, #fff0c2 0%, #ffc234 100%)",
-        textColor: "#573400",
-        valueLabel: "Winner relic",
-      },
-      {
-        id: "royal-heart",
-        name: "Royal Heart",
-        image: "/images/10.png",
-        rarity: "legendary",
-        chance: 14,
-        accent: "linear-gradient(135deg, #ffe0ee 0%, #ff75b0 100%)",
-        textColor: "#631d40",
-        valueLabel: "Luxury charm",
-      },
-      {
-        id: "royal-bloom",
-        name: "Empress Bloom",
-        image: "/images/13.png",
-        rarity: "legendary",
-        chance: 12,
-        accent: "linear-gradient(135deg, #ffe8fb 0%, #ff9ce0 100%)",
-        textColor: "#5e2752",
-        valueLabel: "Seasonal ultra",
-      },
-      {
-        id: "royal-bear",
-        name: "Royal Bear",
-        image: "/images/09.png",
-        rarity: "legendary",
-        chance: 10,
-        accent: "linear-gradient(135deg, #f5e5c2 0%, #d89c58 100%)",
-        textColor: "#4d3217",
-        valueLabel: "Mythic plush",
-      },
-    ],
-  },
-];
+export type CasePaymentStatus =
+  | "pending"
+  | "submitted"
+  | "confirmed"
+  | "expired"
+  | "failed";
 
-export function getCaseBySlug(slug: string) {
-  return caseCatalog.find((caseItem) => caseItem.slug === slug);
-}
+export type CasePaymentIntent = {
+  id: string;
+  caseId: string;
+  caseSlug: string;
+  caseName: string;
+  walletAddress: string;
+  recipientAddress: string;
+  amountTon: number;
+  amountNano: string;
+  reference: string;
+  status: CasePaymentStatus;
+  validUntil: string;
+  confirmedAt: string | null;
+  createdAt: string;
+};
 
-export function getCasesOverview() {
-  return {
-    count: caseCatalog.length,
-    minPriceTon: Math.min(...caseCatalog.map((caseItem) => caseItem.priceTon)),
+export type CaseOpeningResult = {
+  paymentIntent: CasePaymentIntent;
+  opening?: {
+    id: string;
+    userId: string | null;
+    createdAt: string;
+    caseId: string;
+    caseDropId: string;
+    giftTypeId: string;
   };
-}
+  case?: Pick<
+    CaseDefinition,
+    "id" | "slug" | "name" | "priceTon" | "image" | "badgeGradient" | "buttonGradient" | "surfaceTint"
+  >;
+  reward?: CaseReward;
+};
+
+export type WalletBalanceSummary = {
+  address: string;
+  addressRaw: string;
+  network: "mainnet" | "testnet";
+  balanceNano: string;
+  balanceTon: string;
+};
