@@ -18,6 +18,7 @@ import type { ProfileHistoryEntry, ProfileInventoryItem, UserProfilePayload } fr
 
 const statusLabels: Record<ProfileHistoryEntry["status"], string> = {
   owned: "In inventory",
+  in_coinflip: "Locked in CoinFlip",
   sold: "Sold",
   withdraw_pending: "Withdraw requested",
   withdrawn: "Withdrawn",

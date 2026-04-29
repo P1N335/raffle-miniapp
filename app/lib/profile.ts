@@ -1,5 +1,6 @@
 export type InventoryItemStatus =
   | "owned"
+  | "in_coinflip"
   | "sold"
   | "withdraw_pending"
   | "withdrawn";

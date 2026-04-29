@@ -15,6 +15,7 @@ import type { ProfileInventoryItem } from "@/app/lib/profile";
 
 const statusLabels: Record<ProfileInventoryItem["status"], string> = {
   owned: "In inventory",
+  in_coinflip: "Locked in CoinFlip",
   sold: "Sold",
   withdraw_pending: "Withdraw requested",
   withdrawn: "Withdrawn",

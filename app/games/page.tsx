@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, Lightbulb, Package2, Ticket, Trophy } from "lucide-react";
+import { ChevronLeft, Lightbulb, Package2, Swords } from "lucide-react";
 import Link from "next/link";
 import { fetchCasesCatalog } from "@/app/lib/cases-api";
+import { fetchOpenCoinflipRooms } from "@/app/lib/coinflip-api";
 
 type Stat = {
   label: string;
@@ -69,33 +70,53 @@ export default function GamesPage() {
     count: 0,
     minPriceTon: 0,
   });
+  const [coinflipOverview, setCoinflipOverview] = useState({
+    openRooms: 0,
+    averageRoomTon: 0,
+  });
 
   useEffect(() => {
-    const loadCasesOverview = async () => {
+    const loadOverview = async () => {
       try {
-        const cases = await fetchCasesCatalog();
+        const [cases, rooms] = await Promise.all([
+          fetchCasesCatalog(),
+          fetchOpenCoinflipRooms(),
+        ]);
 
         if (cases.length === 0) {
           setCasesOverview({
             count: 0,
             minPriceTon: 0,
           });
-          return;
+        } else {
+          setCasesOverview({
+            count: cases.length,
+            minPriceTon: Math.min(...cases.map((caseItem) => caseItem.priceTon)),
+          });
         }
 
-        setCasesOverview({
-          count: cases.length,
-          minPriceTon: Math.min(...cases.map((caseItem) => caseItem.priceTon)),
+        setCoinflipOverview({
+          openRooms: rooms.length,
+          averageRoomTon:
+            rooms.length > 0
+              ? Math.round(
+                  rooms.reduce((sum, room) => sum + room.creatorTotalTon, 0) / rooms.length
+                )
+              : 0,
         });
       } catch {
         setCasesOverview({
           count: 0,
           minPriceTon: 0,
         });
+        setCoinflipOverview({
+          openRooms: 0,
+          averageRoomTon: 0,
+        });
       }
     };
 
-    loadCasesOverview();
+    loadOverview();
   }, []);
 
   return (
@@ -111,35 +132,30 @@ export default function GamesPage() {
       </div>
 
       <p className="mb-6 text-center text-lg text-white/90">
-        Choose a game to participate in raffles
+        Choose a game mode and play with your Telegram gifts
       </p>
 
       <div className="space-y-5">
         <GameCard
-          title="Lucky Raffle"
-          subtitle="Daily raffle with amazing prizes"
-          buttonText="Enter Raffle"
-          icon={<Ticket className="h-7 w-7" />}
-          iconClassName="bg-orange-400"
-          buttonClassName="bg-sky-500"
-          href="/games/raffle"
-          stats={[
-            { label: "Prize Pool", value: "1000 TON", valueClassName: "text-sky-600" },
-            { label: "Entries", value: "2,547" },
-          ]}
-        />
-
-        <GameCard
           title="Coin Flip"
-          subtitle="50/50 chance to win premium prizes"
-          buttonText="Play Coin Flip"
-          icon={<Trophy className="h-7 w-7" />}
+          subtitle="Create rooms, challenge players and win their gifts"
+          buttonText="Open Coin Flip"
+          icon={<Swords className="h-7 w-7" />}
           iconClassName="bg-gradient-to-br from-violet-500 to-pink-500"
           buttonClassName="bg-gradient-to-r from-violet-500 to-pink-500"
           href="/games/coinflip"
           stats={[
-            { label: "Prize Pool", value: "5000 TON", valueClassName: "text-sky-600" },
-            { label: "Entries", value: "847" },
+            {
+              label: "Open rooms",
+              value: coinflipOverview.openRooms ? String(coinflipOverview.openRooms) : "0",
+              valueClassName: "text-sky-600",
+            },
+            {
+              label: "Avg. room",
+              value: coinflipOverview.averageRoomTon
+                ? `${coinflipOverview.averageRoomTon} TON`
+                : "Waiting...",
+            },
           ]}
         />
 
@@ -170,7 +186,7 @@ export default function GamesPage() {
       <div className="mt-6 rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-base text-white/90">
         <div className="flex items-center gap-3">
           <Lightbulb className="h-5 w-5 text-amber-300" />
-          Enter raffles to win Telegram presents and TON rewards
+          Use Cases to build inventory, then risk up to 3 gifts in CoinFlip rooms
         </div>
       </div>
     </main>
