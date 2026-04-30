@@ -61,11 +61,13 @@ export type UserProfilePayload = {
     firstName: string | null;
     lastName: string | null;
     photoUrl: string | null;
+    balanceTon: number;
     tonWalletAddress: string | null;
     tonWalletNetwork: "MAINNET" | "TESTNET" | null;
     tonWalletConnectedAt: string | null;
   };
   summary: {
+    balanceTon: number;
     totalWonTon: number;
     totalItemsWon: number;
     activeInventoryCount: number;
@@ -74,4 +76,9 @@ export type UserProfilePayload = {
   };
   inventory: ProfileInventoryItem[];
   openingHistory: ProfileHistoryEntry[];
+};
+
+export type UserBalancePayload = {
+  userId: string;
+  balanceTon: number;
 };

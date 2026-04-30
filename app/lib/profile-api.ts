@@ -1,5 +1,9 @@
 import { buildApiUrl } from "@/app/lib/api";
-import type { ProfileInventoryItem, UserProfilePayload } from "@/app/lib/profile";
+import type {
+  ProfileInventoryItem,
+  UserBalancePayload,
+  UserProfilePayload,
+} from "@/app/lib/profile";
 
 export async function fetchUserProfile(userId: string) {
   const response = await fetch(buildApiUrl(`/users/${userId}/profile`), {
@@ -23,6 +27,18 @@ export async function fetchInventoryItem(userId: string, openingId: string) {
   }
 
   return (await response.json()) as ProfileInventoryItem;
+}
+
+export async function fetchUserBalance(userId: string) {
+  const response = await fetch(buildApiUrl(`/users/${userId}/balance`), {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await buildApiErrorMessage(response, "Failed to load balance"));
+  }
+
+  return (await response.json()) as UserBalancePayload;
 }
 
 export async function sellInventoryItem(userId: string, openingId: string) {

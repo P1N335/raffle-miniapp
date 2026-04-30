@@ -14,6 +14,7 @@ import { useTonWalletBalance } from "@/app/hooks/useTonWalletBalance";
 import {
   createCasePaymentIntent,
   fetchCasePaymentIntentStatus,
+  openCaseWithBalance,
   submitCasePaymentIntent,
 } from "@/app/lib/cases-api";
 import type { CaseDefinition, CaseOpeningResult, CaseReward } from "@/app/lib/cases";
@@ -35,7 +36,15 @@ const rarityLabels: Record<CaseReward["rarity"], string> = {
   legendary: "Legendary",
 };
 
-export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
+export function CaseOpeningMachine({
+  caseData,
+  internalBalanceTon,
+  onInternalBalanceChange,
+}: {
+  caseData: CaseDefinition;
+  internalBalanceTon: number | null;
+  onInternalBalanceChange?: (balanceTon: number) => void;
+}) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const spinTimeoutRef = useRef<number | null>(null);
   const { user } = useTelegramAuth();
@@ -58,6 +67,8 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
   const [selectedReward, setSelectedReward] = useState<CaseReward | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const hasEnoughInternalBalance =
+    internalBalanceTon !== null && internalBalanceTon >= caseData.priceTon;
 
   useEffect(() => {
     setRailItems(previewRail);
@@ -93,7 +104,7 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
     [caseData.rewards]
   );
 
-  async function openCase() {
+  async function openCaseWithTonWallet() {
     if (isOpening) {
       return;
     }
@@ -134,40 +145,7 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
       await submitCasePaymentIntent(intentPayload.paymentIntent.id, transactionResult?.boc);
 
       const verifiedOpening = await waitForConfirmedOpening(intentPayload.paymentIntent.id);
-
-      if (!verifiedOpening.reward) {
-        throw new Error(
-          "TON payment was submitted, but the reward is not confirmed yet. Try reopening the case page in a few seconds."
-        );
-      }
-
-      const winningReward =
-        caseData.rewards.find((reward) => reward.id === verifiedOpening.reward?.id) ??
-        verifiedOpening.reward;
-
-      const { items, targetIndex } = createSpinRail(caseData.rewards, winningReward);
-
-      if (spinTimeoutRef.current !== null) {
-        window.clearTimeout(spinTimeoutRef.current);
-      }
-
-      setStatusMessage("Opening your case...");
-      setTransitionEnabled(false);
-      setRailItems(items);
-      setTranslateX(0);
-
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          setTransitionEnabled(true);
-          setTranslateX(getTargetOffset(targetIndex, viewportWidth));
-        });
-      });
-
-      spinTimeoutRef.current = window.setTimeout(() => {
-        setSelectedReward(winningReward);
-        setIsOpening(false);
-        setStatusMessage(null);
-      }, SPIN_DURATION_MS + 120);
+      await finishOpeningAnimation(verifiedOpening);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to open case with TON wallet";
@@ -178,6 +156,44 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
         setError(message);
       }
 
+      setStatusMessage(null);
+      setIsOpening(false);
+    }
+  }
+
+  async function openCaseFromBalance() {
+    if (isOpening) {
+      return;
+    }
+
+    if (!user?.id) {
+      setError("Telegram profile is required to use your internal balance");
+      setStatusMessage(null);
+      return;
+    }
+
+    if (!hasEnoughInternalBalance) {
+      setError(`You need at least ${caseData.priceTon} TON on your internal balance`);
+      setStatusMessage(null);
+      return;
+    }
+
+    setIsOpening(true);
+    setError(null);
+    setSelectedReward(null);
+    setStatusMessage("Spending your internal balance...");
+
+    try {
+      const verifiedOpening = await openCaseWithBalance(caseData.slug, user.id);
+      await finishOpeningAnimation(verifiedOpening);
+
+      if (typeof verifiedOpening.balanceTon === "number") {
+        onInternalBalanceChange?.(verifiedOpening.balanceTon);
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to open case with internal balance"
+      );
       setStatusMessage(null);
       setIsOpening(false);
     }
@@ -205,6 +221,45 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
     throw new Error(
       "TON payment is still waiting for blockchain confirmation. Please check again in a few seconds."
     );
+  }
+
+  async function finishOpeningAnimation(verifiedOpening: CaseOpeningResult) {
+    if (!verifiedOpening.reward) {
+      throw new Error(
+        "The reward is not confirmed yet. Try reopening the case page in a few seconds."
+      );
+    }
+
+    const winningReward =
+      caseData.rewards.find((reward) => reward.id === verifiedOpening.reward?.id) ??
+      verifiedOpening.reward;
+
+    const { items, targetIndex } = createSpinRail(caseData.rewards, winningReward);
+
+    if (spinTimeoutRef.current !== null) {
+      window.clearTimeout(spinTimeoutRef.current);
+    }
+
+    setStatusMessage("Opening your case...");
+    setTransitionEnabled(false);
+    setRailItems(items);
+    setTranslateX(0);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setTransitionEnabled(true);
+        setTranslateX(getTargetOffset(targetIndex, viewportWidth));
+      });
+    });
+
+    await new Promise<void>((resolve) => {
+      spinTimeoutRef.current = window.setTimeout(() => {
+        setSelectedReward(winningReward);
+        setIsOpening(false);
+        setStatusMessage(null);
+        resolve();
+      }, SPIN_DURATION_MS + 120);
+    });
   }
 
   return (
@@ -256,12 +311,24 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
       </div>
 
       <button
-        onClick={openCase}
+        onClick={hasEnoughInternalBalance ? openCaseFromBalance : openCaseWithTonWallet}
         disabled={isOpening}
         className="mt-8 w-full rounded-[1.6rem] px-6 py-5 text-lg font-extrabold text-white shadow-[0_16px_40px_rgba(151,56,255,0.3)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
         style={{ backgroundImage: caseData.buttonGradient }}
       >
-        {isOpening ? "Processing TON payment..." : `Pay ${caseData.priceTon} TON & Open Case`}
+        {isOpening
+          ? "Opening case..."
+          : hasEnoughInternalBalance
+            ? `Use ${caseData.priceTon} TON From Balance`
+            : `Pay ${caseData.priceTon} TON & Open Case`}
+      </button>
+
+      <button
+        onClick={openCaseWithTonWallet}
+        disabled={isOpening}
+        className="mt-3 w-full rounded-[1.4rem] border border-white/15 bg-white/[0.06] px-6 py-4 text-base font-bold text-white transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        Pay with TON Wallet Instead
       </button>
 
       {statusMessage && (
@@ -295,7 +362,7 @@ export function CaseOpeningMachine({ caseData }: { caseData: CaseDefinition }) {
       <div className="mt-6 rounded-[1.4rem] border border-white/10 bg-white/[0.06] px-5 py-4 text-sm text-white/80">
         <div className="flex items-center justify-center gap-2">
           <Sparkles className="h-4 w-4 text-amber-300" />
-          Each case is paid from TON Wallet and only opens after backend verification
+          Cases can be paid from your internal balance or from TON Wallet after backend verification
         </div>
       </div>
 

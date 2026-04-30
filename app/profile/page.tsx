@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  BadgeDollarSign,
   ChevronLeft,
   Copy,
   Crown,
@@ -172,6 +173,19 @@ export default function ProfilePage() {
                   {profile?.user.tonWalletAddress ?? "Wallet is not connected yet"}
                 </div>
               </div>
+
+              <div className="rounded-2xl bg-slate-100 px-4 py-4">
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <BadgeDollarSign className="h-4 w-4" />
+                  Internal Balance
+                </div>
+                <div className="mt-2 text-2xl font-extrabold text-emerald-600">
+                  {profile?.summary.balanceTon ?? 0} TON
+                </div>
+                <div className="mt-1 text-sm text-slate-500">
+                  Gift sales are credited here and can be used to open cases.
+                </div>
+              </div>
             </div>
           </>
         )}
@@ -181,6 +195,13 @@ export default function ProfilePage() {
         <>
           <section className="mt-6">
             <div className="grid grid-cols-2 gap-3">
+              <SummaryCard
+                icon={<BadgeDollarSign className="h-5 w-5 text-emerald-100" />}
+                title="Balance"
+                value={`${profile.summary.balanceTon} TON`}
+                subtitle="ready to spend"
+                gradient="linear-gradient(135deg, #10b981 0%, #22c55e 100%)"
+              />
               <SummaryCard
                 icon={<Gem className="h-5 w-5 text-cyan-100" />}
                 title="Total won"
@@ -193,7 +214,7 @@ export default function ProfilePage() {
                 title="Inventory"
                 value={`${profile.summary.activeInventoryCount}`}
                 subtitle="available gifts"
-                gradient="linear-gradient(135deg, #10b981 0%, #14b8a6 100%)"
+                gradient="linear-gradient(135deg, #14b8a6 0%, #0ea5a4 100%)"
               />
               <SummaryCard
                 icon={<WalletCards className="h-5 w-5 text-fuchsia-100" />}

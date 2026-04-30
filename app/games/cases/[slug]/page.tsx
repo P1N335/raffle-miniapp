@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useTelegramAuth } from "@/app/hooks/useTelegramAuth";
 import { fetchCaseBySlug } from "@/app/lib/cases-api";
+import { fetchUserBalance } from "@/app/lib/profile-api";
 import type { CaseDefinition } from "@/app/lib/cases";
 import { CaseOpeningMachine } from "@/components/games/case-opening-machine";
 import { TonWalletCard } from "@/components/games/ton-wallet-card";
@@ -13,8 +15,10 @@ import { TonWalletCard } from "@/components/games/ton-wallet-card";
 export default function CaseDetailsPage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const { user, loading: authLoading } = useTelegramAuth();
 
   const [caseItem, setCaseItem] = useState<CaseDefinition | null>(null);
+  const [internalBalanceTon, setInternalBalanceTon] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +43,36 @@ export default function CaseDetailsPage() {
 
     loadCase();
   }, [slug]);
+
+  useEffect(() => {
+    const authenticatedUserId = user?.id;
+
+    if (authLoading || !authenticatedUserId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBalance = async () => {
+      try {
+        const payload = await fetchUserBalance(authenticatedUserId);
+
+        if (!cancelled) {
+          setInternalBalanceTon(payload.balanceTon);
+        }
+      } catch {
+        if (!cancelled) {
+          setInternalBalanceTon(null);
+        }
+      }
+    };
+
+    loadBalance();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user?.id]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#1f2a47_0%,_#111827_45%,_#0a1020_100%)] text-white">
@@ -84,8 +118,15 @@ export default function CaseDetailsPage() {
               <p className="mt-3 text-xl text-white/75">Spin to reveal your prize</p>
             </div>
 
-            <TonWalletCard requiredTon={caseItem.priceTon} />
-            <CaseOpeningMachine caseData={caseItem} />
+            <TonWalletCard
+              requiredTon={caseItem.priceTon}
+              internalBalanceTon={internalBalanceTon}
+            />
+            <CaseOpeningMachine
+              caseData={caseItem}
+              internalBalanceTon={internalBalanceTon}
+              onInternalBalanceChange={setInternalBalanceTon}
+            />
           </>
         )}
       </div>

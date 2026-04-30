@@ -33,11 +33,14 @@ export type CasePaymentStatus =
   | "expired"
   | "failed";
 
+export type CasePaymentSource = "ton_wallet" | "internal_balance";
+
 export type CasePaymentIntent = {
   id: string;
   caseId: string;
   caseSlug: string;
   caseName: string;
+  paymentSource: CasePaymentSource;
   walletAddress: string;
   recipientAddress: string;
   amountTon: number;
@@ -64,6 +67,7 @@ export type CaseOpeningResult = {
     "id" | "slug" | "name" | "priceTon" | "image" | "badgeGradient" | "buttonGradient" | "surfaceTint"
   >;
   reward?: CaseReward;
+  balanceTon?: number;
 };
 
 export type WalletBalanceSummary = {

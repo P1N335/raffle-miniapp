@@ -99,6 +99,24 @@ export async function fetchCasePaymentIntentStatus(intentId: string) {
   return (await response.json()) as CaseOpeningResult;
 }
 
+export async function openCaseWithBalance(slug: string, userId: string) {
+  const response = await fetch(buildApiUrl(`/cases/${slug}/open-with-balance`), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await buildApiErrorMessage(response, "Failed to open case with internal balance")
+    );
+  }
+
+  return (await response.json()) as CaseOpeningResult;
+}
+
 export async function fetchWalletBalance(address: string) {
   const response = await fetch(
     buildApiUrl(`/cases/wallet-balance?address=${encodeURIComponent(address)}`),

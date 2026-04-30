@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Package2, Sparkles } from "lucide-react";
+import { BadgeDollarSign, ChevronLeft, ChevronRight, Package2, Sparkles } from "lucide-react";
+import { useTelegramAuth } from "@/app/hooks/useTelegramAuth";
 import { fetchCasesCatalog } from "@/app/lib/cases-api";
+import { fetchUserBalance } from "@/app/lib/profile-api";
 import type { CaseDefinition } from "@/app/lib/cases";
 
 export default function CasesPage() {
+  const { user, loading: authLoading } = useTelegramAuth();
   const [cases, setCases] = useState<CaseDefinition[]>([]);
+  const [balanceTon, setBalanceTon] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +32,36 @@ export default function CasesPage() {
     loadCases();
   }, []);
 
+  useEffect(() => {
+    const authenticatedUserId = user?.id;
+
+    if (authLoading || !authenticatedUserId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBalance = async () => {
+      try {
+        const payload = await fetchUserBalance(authenticatedUserId);
+
+        if (!cancelled) {
+          setBalanceTon(payload.balanceTon);
+        }
+      } catch {
+        if (!cancelled) {
+          setBalanceTon(null);
+        }
+      }
+    };
+
+    loadBalance();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user?.id]);
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-md px-5 py-6 text-white">
       <div className="mb-8 flex items-center gap-4 border-b border-white/20 pb-5">
@@ -43,6 +77,25 @@ export default function CasesPage() {
       <p className="mb-8 text-center text-lg text-white/90">
         Choose a case to open and win amazing prizes
       </p>
+
+      <div className="mb-6 rounded-[1.8rem] border border-white/10 bg-white/[0.08] px-5 py-4 text-white">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-200">
+            <BadgeDollarSign className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-white/45">
+              Internal Balance
+            </div>
+            <div className="mt-1 text-2xl font-extrabold text-emerald-300">
+              {balanceTon !== null ? `${balanceTon} TON` : "Connect Telegram profile"}
+            </div>
+            <div className="mt-1 text-sm text-white/65">
+              Sold gifts credit this balance. If it covers the case price, you can open instantly.
+            </div>
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div className="mb-5 rounded-2xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">

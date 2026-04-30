@@ -4,7 +4,13 @@ import { AlertCircle, ShieldCheck, Wallet } from "lucide-react";
 import { TonConnectButton, useTonAddress, useTonWallet } from "@tonconnect/ui-react";
 import { useTonWalletBalance } from "@/app/hooks/useTonWalletBalance";
 
-export function TonWalletCard({ requiredTon }: { requiredTon: number }) {
+export function TonWalletCard({
+  requiredTon,
+  internalBalanceTon,
+}: {
+  requiredTon: number;
+  internalBalanceTon: number | null;
+}) {
   const wallet = useTonWallet();
   const address = useTonAddress(true);
   const { balance, loading, error } = useTonWalletBalance(address);
@@ -30,7 +36,7 @@ export function TonWalletCard({ requiredTon }: { requiredTon: number }) {
         <TonConnectButton className="shrink-0" />
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-[1.35rem] border border-white/10 bg-[#111b31] px-4 py-4">
           <div className="text-xs uppercase tracking-[0.18em] text-white/45">Balance</div>
           <div className="mt-2 text-2xl font-extrabold text-white">
@@ -38,6 +44,18 @@ export function TonWalletCard({ requiredTon }: { requiredTon: number }) {
           </div>
           <div className="mt-1 text-sm text-white/55">
             {balance ? `Network: ${balance.network}` : "Wallet balance comes from the connected address"}
+          </div>
+        </div>
+
+        <div className="rounded-[1.35rem] border border-white/10 bg-[#111b31] px-4 py-4">
+          <div className="text-xs uppercase tracking-[0.18em] text-white/45">
+            App Balance
+          </div>
+          <div className="mt-2 text-2xl font-extrabold text-emerald-300">
+            {internalBalanceTon !== null ? `${internalBalanceTon} TON` : "Sign in"}
+          </div>
+          <div className="mt-1 text-sm text-white/55">
+            Sell gifts to top up this balance and spend it on cases.
           </div>
         </div>
 
