@@ -15,7 +15,7 @@ import { TonWalletCard } from "@/components/games/ton-wallet-card";
 export default function CaseDetailsPage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  const { user, loading: authLoading } = useTelegramAuth();
+  const { user, loading: authLoading, error: authError } = useTelegramAuth();
 
   const [caseItem, setCaseItem] = useState<CaseDefinition | null>(null);
   const [internalBalanceTon, setInternalBalanceTon] = useState<number | null>(null);
@@ -23,26 +23,49 @@ export default function CaseDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
     if (!slug) {
       setError("Case slug is missing");
       setLoading(false);
       return;
     }
 
+    if (!user?.id) {
+      setError(authError ?? "Telegram session is required to load this case");
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
     const loadCase = async () => {
       try {
         const loadedCase = await fetchCaseBySlug(slug);
-        setCaseItem(loadedCase);
-        setError(null);
+
+        if (!cancelled) {
+          setCaseItem(loadedCase);
+          setError(null);
+        }
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load case");
+        if (!cancelled) {
+          setError(error instanceof Error ? error.message : "Failed to load case");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadCase();
-  }, [slug]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authError, authLoading, slug, user?.id]);
 
   useEffect(() => {
     const authenticatedUserId = user?.id;
@@ -55,7 +78,7 @@ export default function CaseDetailsPage() {
 
     const loadBalance = async () => {
       try {
-        const payload = await fetchUserBalance(authenticatedUserId);
+        const payload = await fetchUserBalance();
 
         if (!cancelled) {
           setInternalBalanceTon(payload.balanceTon);

@@ -58,7 +58,7 @@ export default function CoinflipLobbyPage() {
       try {
         const [roomsPayload, profilePayload] = await Promise.all([
           fetchOpenCoinflipRooms(),
-          fetchUserProfile(userId),
+          fetchUserProfile(),
         ]);
 
         if (!cancelled) {
@@ -139,7 +139,6 @@ export default function CoinflipLobbyPage() {
 
     try {
       const room = await createCoinflipRoom({
-        userId,
         openingIds: selectedCreateIds,
       });
 

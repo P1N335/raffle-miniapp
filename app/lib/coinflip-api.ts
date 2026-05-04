@@ -1,8 +1,8 @@
-import { buildApiUrl } from "@/app/lib/api";
+import { apiFetch } from "@/app/lib/api";
 import type { CoinflipRoomDetail, CoinflipRoomSummary } from "@/app/lib/coinflip";
 
 export async function fetchOpenCoinflipRooms() {
-  const response = await fetch(buildApiUrl("/coinflip/rooms"), {
+  const response = await apiFetch("/coinflip/rooms", {
     cache: "no-store",
   });
 
@@ -14,7 +14,7 @@ export async function fetchOpenCoinflipRooms() {
 }
 
 export async function fetchCoinflipRoom(roomId: string) {
-  const response = await fetch(buildApiUrl(`/coinflip/rooms/${roomId}`), {
+  const response = await apiFetch(`/coinflip/rooms/${roomId}`, {
     cache: "no-store",
   });
 
@@ -25,11 +25,8 @@ export async function fetchCoinflipRoom(roomId: string) {
   return (await response.json()) as CoinflipRoomDetail;
 }
 
-export async function createCoinflipRoom(input: {
-  userId: string;
-  openingIds: string[];
-}) {
-  const response = await fetch(buildApiUrl("/coinflip/rooms"), {
+export async function createCoinflipRoom(input: { openingIds: string[] }) {
+  const response = await apiFetch("/coinflip/rooms", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,13 +41,13 @@ export async function createCoinflipRoom(input: {
   return (await response.json()) as CoinflipRoomDetail;
 }
 
-export async function cancelCoinflipRoom(roomId: string, userId: string) {
-  const response = await fetch(buildApiUrl(`/coinflip/rooms/${roomId}/cancel`), {
+export async function cancelCoinflipRoom(roomId: string) {
+  const response = await apiFetch(`/coinflip/rooms/${roomId}/cancel`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 
   if (!response.ok) {
@@ -62,16 +59,14 @@ export async function cancelCoinflipRoom(roomId: string, userId: string) {
 
 export async function joinCoinflipRoom(input: {
   roomId: string;
-  userId: string;
   openingIds: string[];
 }) {
-  const response = await fetch(buildApiUrl(`/coinflip/rooms/${input.roomId}/join`), {
+  const response = await apiFetch(`/coinflip/rooms/${input.roomId}/join`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      userId: input.userId,
       openingIds: input.openingIds,
     }),
   });

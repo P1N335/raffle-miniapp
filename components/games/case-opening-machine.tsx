@@ -133,7 +133,6 @@ export function CaseOpeningMachine({
       const intentPayload = await createCasePaymentIntent({
         slug: caseData.slug,
         walletAddress,
-        userId: user?.id ?? undefined,
       });
 
       setStatusMessage("Confirm the TON payment in your wallet...");
@@ -184,7 +183,7 @@ export function CaseOpeningMachine({
     setStatusMessage("Spending your internal balance...");
 
     try {
-      const verifiedOpening = await openCaseWithBalance(caseData.slug, user.id);
+      const verifiedOpening = await openCaseWithBalance(caseData.slug);
       await finishOpeningAnimation(verifiedOpening);
 
       if (typeof verifiedOpening.balanceTon === "number") {

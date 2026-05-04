@@ -1,12 +1,12 @@
-import { buildApiUrl } from "@/app/lib/api";
+import { apiFetch } from "@/app/lib/api";
 import type {
   ProfileInventoryItem,
   UserBalancePayload,
   UserProfilePayload,
 } from "@/app/lib/profile";
 
-export async function fetchUserProfile(userId: string) {
-  const response = await fetch(buildApiUrl(`/users/${userId}/profile`), {
+export async function fetchUserProfile() {
+  const response = await apiFetch(`/users/me/profile`, {
     cache: "no-store",
   });
 
@@ -17,8 +17,8 @@ export async function fetchUserProfile(userId: string) {
   return (await response.json()) as UserProfilePayload;
 }
 
-export async function fetchInventoryItem(userId: string, openingId: string) {
-  const response = await fetch(buildApiUrl(`/users/${userId}/inventory/${openingId}`), {
+export async function fetchInventoryItem(openingId: string) {
+  const response = await apiFetch(`/users/me/inventory/${openingId}`, {
     cache: "no-store",
   });
 
@@ -29,8 +29,8 @@ export async function fetchInventoryItem(userId: string, openingId: string) {
   return (await response.json()) as ProfileInventoryItem;
 }
 
-export async function fetchUserBalance(userId: string) {
-  const response = await fetch(buildApiUrl(`/users/${userId}/balance`), {
+export async function fetchUserBalance() {
+  const response = await apiFetch(`/users/me/balance`, {
     cache: "no-store",
   });
 
@@ -41,13 +41,10 @@ export async function fetchUserBalance(userId: string) {
   return (await response.json()) as UserBalancePayload;
 }
 
-export async function sellInventoryItem(userId: string, openingId: string) {
-  const response = await fetch(
-    buildApiUrl(`/users/${userId}/inventory/${openingId}/sell`),
-    {
-      method: "POST",
-    }
-  );
+export async function sellInventoryItem(openingId: string) {
+  const response = await apiFetch(`/users/me/inventory/${openingId}/sell`, {
+    method: "POST",
+  });
 
   if (!response.ok) {
     throw new Error(await buildApiErrorMessage(response, "Failed to sell inventory item"));
@@ -56,13 +53,10 @@ export async function sellInventoryItem(userId: string, openingId: string) {
   return (await response.json()) as ProfileInventoryItem;
 }
 
-export async function withdrawInventoryItem(userId: string, openingId: string) {
-  const response = await fetch(
-    buildApiUrl(`/users/${userId}/inventory/${openingId}/withdraw`),
-    {
-      method: "POST",
-    }
-  );
+export async function withdrawInventoryItem(openingId: string) {
+  const response = await apiFetch(`/users/me/inventory/${openingId}/withdraw`, {
+    method: "POST",
+  });
 
   if (!response.ok) {
     throw new Error(

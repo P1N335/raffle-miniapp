@@ -31,3 +31,10 @@ export function buildApiUrl(path: string) {
 
   return `${apiBaseUrl}${normalizedPath}`;
 }
+
+export function apiFetch(path: string, init?: RequestInit) {
+  return fetch(buildApiUrl(path), {
+    credentials: "include",
+    ...init,
+  });
+}

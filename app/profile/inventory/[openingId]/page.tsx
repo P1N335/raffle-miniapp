@@ -51,7 +51,7 @@ export default function InventoryItemPage() {
       setPageLoading(true);
 
       try {
-        const payload = await fetchInventoryItem(userId, openingId);
+        const payload = await fetchInventoryItem(openingId);
 
         if (!cancelled) {
           setItem(payload);
@@ -89,8 +89,8 @@ export default function InventoryItemPage() {
       try {
         const updatedItem =
           action === "sell"
-            ? await sellInventoryItem(userId, item.id)
-            : await withdrawInventoryItem(userId, item.id);
+            ? await sellInventoryItem(item.id)
+            : await withdrawInventoryItem(item.id);
 
         setItem(updatedItem);
         setError(null);

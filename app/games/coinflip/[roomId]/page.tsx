@@ -64,7 +64,7 @@ export default function CoinflipRoomPage() {
       try {
         const [roomPayload, profilePayload] = await Promise.all([
           fetchCoinflipRoom(roomId),
-          fetchUserProfile(userId),
+          fetchUserProfile(),
         ]);
 
         if (!cancelled) {
@@ -155,7 +155,7 @@ export default function CoinflipRoomPage() {
     setIsPending(true);
 
     try {
-      await cancelCoinflipRoom(room.id, userId);
+      await cancelCoinflipRoom(room.id);
       router.push("/games/coinflip");
     } catch (cancelError) {
       setPageError(
@@ -175,7 +175,6 @@ export default function CoinflipRoomPage() {
     try {
       const updatedRoom = await joinCoinflipRoom({
         roomId: room.id,
-        userId,
         openingIds: selectedIds,
       });
 

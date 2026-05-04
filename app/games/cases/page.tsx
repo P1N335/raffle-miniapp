@@ -10,27 +10,50 @@ import { fetchUserBalance } from "@/app/lib/profile-api";
 import type { CaseDefinition } from "@/app/lib/cases";
 
 export default function CasesPage() {
-  const { user, loading: authLoading } = useTelegramAuth();
+  const { user, loading: authLoading, error: authError } = useTelegramAuth();
   const [cases, setCases] = useState<CaseDefinition[]>([]);
   const [balanceTon, setBalanceTon] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    if (!user?.id) {
+      setLoading(false);
+      setError(authError ?? "Telegram session is required to load cases");
+      return;
+    }
+
+    let cancelled = false;
+
     const loadCases = async () => {
       try {
         const loadedCases = await fetchCasesCatalog();
-        setCases(loadedCases);
-        setError(null);
+
+        if (!cancelled) {
+          setCases(loadedCases);
+          setError(null);
+        }
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load cases");
+        if (!cancelled) {
+          setError(error instanceof Error ? error.message : "Failed to load cases");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadCases();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authError, authLoading, user?.id]);
 
   useEffect(() => {
     const authenticatedUserId = user?.id;
@@ -43,7 +66,7 @@ export default function CasesPage() {
 
     const loadBalance = async () => {
       try {
-        const payload = await fetchUserBalance(authenticatedUserId);
+        const payload = await fetchUserBalance();
 
         if (!cancelled) {
           setBalanceTon(payload.balanceTon);

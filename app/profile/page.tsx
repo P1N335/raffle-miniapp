@@ -11,9 +11,11 @@ import {
   Gem,
   History,
   Package2,
+  ShieldCheck,
   WalletCards,
 } from "lucide-react";
 import { useTelegramAuth } from "@/app/hooks/useTelegramAuth";
+import { fetchAdminStatus } from "@/app/lib/admin-api";
 import { fetchUserProfile } from "@/app/lib/profile-api";
 import type { ProfileHistoryEntry, ProfileInventoryItem, UserProfilePayload } from "@/app/lib/profile";
 
@@ -31,6 +33,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfilePayload | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (loading) {
@@ -50,7 +53,7 @@ export default function ProfilePage() {
       setProfileLoading(true);
 
       try {
-        const payload = await fetchUserProfile(userId);
+        const payload = await fetchUserProfile();
 
         if (!cancelled) {
           setProfile(payload);
@@ -73,6 +76,34 @@ export default function ProfilePage() {
       cancelled = true;
     };
   }, [loading, user, userId]);
+
+  useEffect(() => {
+    if (loading || !userId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadAdminStatus = async () => {
+      try {
+        const payload = await fetchAdminStatus();
+
+        if (!cancelled) {
+          setIsAdmin(payload.isAdmin);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    void loadAdminStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, userId]);
 
   const profileUser = profile?.user ?? user;
   const displayName = profileUser?.username
@@ -236,6 +267,29 @@ export default function ProfilePage() {
               />
             </div>
           </section>
+
+          {isAdmin && (
+            <section className="mt-6">
+              <Link
+                href="/admin"
+                className="flex items-center justify-between rounded-3xl border border-white/10 bg-white/8 px-5 py-5 text-white shadow-[0_16px_30px_rgba(0,0,0,0.12)] transition active:scale-[0.99]"
+              >
+                <div>
+                  <div className="flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-white/65">
+                    <ShieldCheck className="h-4 w-4" />
+                    Admin
+                  </div>
+                  <div className="mt-2 text-xl font-extrabold">Open control panel</div>
+                  <div className="mt-1 text-sm text-white/65">
+                    Review purchase queue, pending withdrawals, and balance operations.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-cyan-100">
+                  Open
+                </div>
+              </Link>
+            </section>
+          )}
 
           <section className="mt-8">
             <div className="mb-4 flex items-center gap-2 text-sm uppercase tracking-[0.18em] text-white/65">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buildApiUrl } from "@/app/lib/api";
+import { apiFetch } from "@/app/lib/api";
 import { getTelegramUser, getTelegramWebApp } from "@/app/lib/telegram";
 
 type AppUser = {
@@ -42,22 +42,20 @@ export function useTelegramAuth() {
         setUser(mapTelegramUserToAppUser(telegramUser));
       }
 
-      if (!webApp?.initData) {
-        setError("Telegram initData is missing");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch(buildApiUrl("/auth/telegram"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            initData: webApp.initData,
-          }),
-        });
+        const response = webApp?.initData
+          ? await apiFetch("/auth/telegram", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                initData: webApp.initData,
+              }),
+            })
+          : await apiFetch("/auth/me", {
+              cache: "no-store",
+            });
 
         if (!response.ok) {
           let errorMessage = `Auth failed: ${response.status}`;
@@ -90,7 +88,11 @@ export function useTelegramAuth() {
       } catch (error) {
         console.error(error);
         setError(
-          error instanceof Error ? error.message : "Telegram authorization failed"
+          error instanceof Error
+            ? error.message
+            : webApp?.initData
+              ? "Telegram authorization failed"
+              : "Telegram session is not available"
         );
       } finally {
         setLoading(false);

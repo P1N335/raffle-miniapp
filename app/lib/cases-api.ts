@@ -1,4 +1,4 @@
-import { buildApiUrl } from "@/app/lib/api";
+import { apiFetch, buildApiUrl } from "@/app/lib/api";
 import type {
   CaseDefinition,
   CaseOpeningResult,
@@ -23,7 +23,7 @@ type SubmitPaymentIntentResponse = {
 };
 
 export async function fetchCasesCatalog() {
-  const response = await fetch(buildApiUrl("/cases"));
+  const response = await apiFetch("/cases");
 
   if (!response.ok) {
     throw new Error(await buildApiErrorMessage(response, "Failed to load cases"));
@@ -33,7 +33,7 @@ export async function fetchCasesCatalog() {
 }
 
 export async function fetchCaseBySlug(slug: string) {
-  const response = await fetch(buildApiUrl(`/cases/${slug}`));
+  const response = await apiFetch(`/cases/${slug}`);
 
   if (!response.ok) {
     throw new Error(await buildApiErrorMessage(response, "Failed to load case"));
@@ -45,16 +45,14 @@ export async function fetchCaseBySlug(slug: string) {
 export async function createCasePaymentIntent(input: {
   slug: string;
   walletAddress: string;
-  userId?: string;
 }) {
-  const response = await fetch(buildApiUrl(`/cases/${input.slug}/payment-intents`), {
+  const response = await apiFetch(`/cases/${input.slug}/payment-intents`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       walletAddress: input.walletAddress,
-      userId: input.userId,
     }),
   });
 
@@ -68,7 +66,7 @@ export async function createCasePaymentIntent(input: {
 }
 
 export async function submitCasePaymentIntent(intentId: string, boc?: string) {
-  const response = await fetch(buildApiUrl(`/cases/payment-intents/${intentId}/submit`), {
+  const response = await apiFetch(`/cases/payment-intents/${intentId}/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,7 +84,7 @@ export async function submitCasePaymentIntent(intentId: string, boc?: string) {
 }
 
 export async function fetchCasePaymentIntentStatus(intentId: string) {
-  const response = await fetch(buildApiUrl(`/cases/payment-intents/${intentId}`), {
+  const response = await apiFetch(`/cases/payment-intents/${intentId}`, {
     cache: "no-store",
   });
 
@@ -99,13 +97,13 @@ export async function fetchCasePaymentIntentStatus(intentId: string) {
   return (await response.json()) as CaseOpeningResult;
 }
 
-export async function openCaseWithBalance(slug: string, userId: string) {
-  const response = await fetch(buildApiUrl(`/cases/${slug}/open-with-balance`), {
+export async function openCaseWithBalance(slug: string) {
+  const response = await apiFetch(`/cases/${slug}/open-with-balance`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 
   if (!response.ok) {
@@ -121,6 +119,7 @@ export async function fetchWalletBalance(address: string) {
   const response = await fetch(
     buildApiUrl(`/cases/wallet-balance?address=${encodeURIComponent(address)}`),
     {
+      credentials: "include",
       cache: "no-store",
     }
   );
