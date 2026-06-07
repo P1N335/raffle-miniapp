@@ -33,8 +33,12 @@ export function buildApiUrl(path: string) {
 }
 
 export function apiFetch(path: string, init?: RequestInit) {
+  const headers = new Headers(init?.headers);
+  headers.set("x-miniapp-request", "1");
+
   return fetch(buildApiUrl(path), {
     credentials: "include",
     ...init,
+    headers,
   });
 }
